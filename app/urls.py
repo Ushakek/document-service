@@ -1,15 +1,13 @@
-from typing import Optional
-
 from fastapi import APIRouter
+from app.servies import report
+from fastapi.responses import HTMLResponse, FileResponse, Response
 
 router = APIRouter()
 
 
-@router.get("/")
-def read_root():
-    return {"Hello": "World"}
+@router.put('/get_pdf', response_class=FileResponse)
+async def get_some():
+    data = report()
+    return data
 
 
-@router.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
