@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 router = APIRouter()
 
 
-@router.post('/get_html', response_class=FileResponse)
+@router.put('/get_html', response_class=FileResponse)
 async def get_html_report(values: UploadFile = File(...), file: UploadFile = File(...)):
     html_template = await file.read()
     data = await values.read()
@@ -13,7 +13,7 @@ async def get_html_report(values: UploadFile = File(...), file: UploadFile = Fil
     return report_html
 
 
-@router.post('/get_pdf', response_class=FileResponse)
+@router.put('/get_pdf', response_class=FileResponse)
 async def get_pdf_report(values: UploadFile = File(...), file: UploadFile = File(...)):
     html_template = await file.read()
     data = await values.read()
