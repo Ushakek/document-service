@@ -1,21 +1,17 @@
-from fastapi import APIRouter, File, UploadFile
-from app.servies import create_pdf_report, create_html_report
+from fastapi import APIRouter, UploadFile, Depends
+from app.servies import create_pdf_report, create_report, common_parameters
 from fastapi.responses import FileResponse
 
 router = APIRouter()
 
 
-@router.put('/get_html', response_class=FileResponse)
-async def get_html_report(values: UploadFile = File(...), file: UploadFile = File(...)):
-    html_template = await file.read()
-    data = await values.read()
-    report_html = create_html_report(template=html_template, values=data)
-    return report_html
+@router.put('/create_report', response_class=FileResponse)
+def get_report(values: UploadFile = Depends(common_parameters)):
+    data, html_template, media_type, convert_to = values
 
-
-@router.put('/get_pdf', response_class=FileResponse)
-async def get_pdf_report(values: UploadFile = File(...), file: UploadFile = File(...)):
-    html_template = await file.read()
-    data = await values.read()
-    data = create_pdf_report(values=data, templates=html_template)
-    return data
+    if convert_to == 'default' or media_type != 'text/html':
+        report = create_report(template=html_template, values=data, media_type=media_type)
+        return report
+    elif convert_to == 'pdf' and media_type == 'text/html':
+        report = create_pdf_report(templates=html_template, values=data, media_type=media_type)
+        return report
