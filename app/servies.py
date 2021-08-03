@@ -9,7 +9,25 @@ class SafeDict(dict):
         return 'Информация не найдена'
 
 
-def create_html_report(template, values):
+def create_report(template, values, media_type):
+    """ Метод для автозаполнения документов
+
+    Args:
+        template: шаблон в любом формате, который в дальнейшем заполняется
+        values: Значения, должны быть в виде словаря формата json
+        media_type: тип документа
+
+    Принимает в себя 2 значения  в битовом формате, дале производит декодирование этих значений. Далее заполняет
+    отмеченные места в соответствии со значениями в словаре.
+
+    Пример:
+        template = 'Это новый {blank1}, который способен {blank2} пустые места'
+        values = {'blank1': 'метод', 'blank2': 'заполнять'}
+        return = 'Это новый метод, который способен заполнять пустые места'
+
+    Returns:
+        Response(): файл исходной кодировки или файл pdf
+    """
 
     template = template.decode(encoding='utf8')
     values = values.decode(encoding='utf8')
