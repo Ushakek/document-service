@@ -8,9 +8,12 @@ router = APIRouter()
 
 @router.put('/create_report', response_class=FileResponse)
 def get_report(values: UploadFile = Depends(read_form)):
-    data, html_template, media_type, convert_to = values
+    data, html_template, media_type, expansion, convert_to = values
 
-    if convert_to == 'pdf' and media_type == 'text/html':
+    if convert_to == 'pdf' and expansion == '':
+        message = 'Не удалось определить формат шаблона. Шаблон должен быть в формате html для конвертации в pdf'
+        raise HTTPException(status_code=406, detail=message)
+    elif convert_to == 'pdf' and expansion == 'html':
         report = create_pdf_report(template=html_template, values=data, media_type=media_type)
         return report
     elif convert_to == 'pdf' and media_type != 'text/html':
