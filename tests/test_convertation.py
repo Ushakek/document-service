@@ -17,7 +17,7 @@ def test_convert_to_original():
 
     assert response.status_code == 200
     assert response.content == reference
-    print('\nЕсли тест пройден, файл записан, его можно проверить в браузере для проверки наполнения')
+    print('\nЕсли тест пройден, файл записан, его можно посмотреть для проверки наполнения')
 
 
 def test_convert_to_pdf():
@@ -29,6 +29,7 @@ def test_convert_to_pdf():
 
     with open('_data/_current/report_pdf.pdf', 'wb') as file:
         file.write(response.content)
+    print('\nЕсли тест пройден, файл записан, его можно посмотреть для проверки наполнения')
 
 
 def test_error_converting():
@@ -50,3 +51,23 @@ def test_convert_to_any_template():
 
     assert response.status_code == 200
     assert reference == response.content
+
+    with open('_data/_current/report_any.txt', 'wb') as file:
+        file.write(response.content)
+
+    print('\nЕсли тест пройден, файл записан, его можно посмотреть для проверки наполнения')
+
+
+def test_any_format_data():
+    with open('_data/_reference/reference_any_data.txt', 'rb') as file:
+        reference = file.read()
+
+    response = client.put('/create_report?convert_to=default',
+                          files=[('values', open('_data/_source/data_to_report.txt', 'rb')),
+                                 ('file', open('_data/_source/test.txt', 'rb'))])
+
+    assert response.status_code == 200
+    assert reference == response.content
+
+    with open('_data/_current/report_any_data.txt', 'wb') as file:
+        file.write(response.content)
