@@ -26,7 +26,7 @@ def create_report(template, values, media_type):
         return = 'Это новый метод, который способен заполнять пустые места'
 
     Returns:
-        Response(): файл исходной кодировки или файл pdf
+        Response(): файл исходной кодировки
     """
 
     template = template.decode(encoding='utf8')
@@ -36,10 +36,16 @@ def create_report(template, values, media_type):
     current_date = datetime.now()
     date_sys = current_date.strftime('%Y.%m.%d')
     time_sys = current_date.strftime('%H:%M')
-    date = data.get('date', date_sys)
-    time = data.get('time', time_sys)
 
-    filled_template = template.format_map(SafeDict(**data, date=date, time=time))
+    if 'date' not in data.keys() and 'time' not in data.keys():
+        data.update({'date': date_sys})
+        data.update({'time': time_sys})
+    elif 'date' not in data.keys():
+        data.update({'date': date_sys})
+    elif 'time' not in data.keys():
+        data.update({'time': time_sys})
+
+    filled_template = template.format_map(SafeDict(**data))
     return Response(content=filled_template, media_type=media_type)
 
 
