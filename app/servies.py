@@ -1,6 +1,6 @@
 from weasyprint import HTML
 from datetime import datetime
-from fastapi import Response, UploadFile, File, Form
+from fastapi import Response
 from json import JSONDecoder
 
 
@@ -43,15 +43,9 @@ def create_report(template, values, media_type):
     return Response(content=filled_template, media_type=media_type)
 
 
-def create_pdf_report(templates, values, media_type):
-    html_report = create_report(template=templates, values=values, media_type=media_type)
+def create_pdf_report(template, values, media_type):
+    html_report = create_report(template=template, values=values, media_type=media_type)
     html_print = HTML(string=html_report.body)
     data = html_print.write_pdf()
     return Response(content=data, media_type='application/pdf')
 
-
-async def common_parameters(values: UploadFile = File(...), file: UploadFile = File(...),
-                            convert_to: str = Form('default', enum=['pdf'])):
-    data = await values.read()
-    template = await file.read()
-    return data, template, file.content_type, convert_to
