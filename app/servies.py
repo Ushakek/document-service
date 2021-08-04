@@ -1,7 +1,6 @@
 from weasyprint import HTML
 from datetime import datetime
 from fastapi import Response
-from json import JSONDecoder
 
 
 class SafeDict(dict):
@@ -14,7 +13,7 @@ def create_report(template, values, media_type):
 
     Args:
         template: шаблон в любом формате, который в дальнейшем заполняется
-        values: Значения, должны быть в виде словаря формата json
+        values: Значения, должны быть в виде словаря
         media_type: тип документа
 
     Принимает в себя 2 значения  в битовом формате, дале производит декодирование этих значений. Далее заполняет
@@ -30,8 +29,7 @@ def create_report(template, values, media_type):
     """
 
     template = template.decode(encoding='utf8')
-    values = values.decode(encoding='utf8')
-    data = JSONDecoder().decode(values)
+    data = values
 
     current_date = datetime.now()
     date_sys = current_date.strftime('%Y.%m.%d')
@@ -50,6 +48,19 @@ def create_report(template, values, media_type):
 
 
 def create_pdf_report(template, values, media_type):
+    """ Метод конвертации HTML в PDF
+
+    Использует метод create_report() для автозваполнения шаблона, передаёт этот шаблон в кодератор HTML5
+    для дальнейшей конвертации в PDF. Можно использовать только HTML шаблоны
+
+    Args:
+        template: шаблон в формате HTML, который в дальнейшем заполняется
+        values: Значения, должны быть в виде словаря
+        media_type: тип документа, используется только для автозаполнения
+
+    Returns:
+        Response(): Файл в формате pdf
+    """
     html_report = create_report(template=template, values=values, media_type=media_type)
     html_print = HTML(string=html_report.body)
     data = html_print.write_pdf()
