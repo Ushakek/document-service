@@ -1,9 +1,4 @@
 from fastapi import UploadFile, File, Query
-from pydantic import BaseModel, Field
-
-
-class Items(BaseModel):
-    val: dict = Field(..., title='Подставляемые значения')
 
 
 def read_form(values: UploadFile = File(...),
