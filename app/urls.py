@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, Depends, HTTPException, Response
 from app.logic import create_pdf_report, create_report
 from app.dependencies import read_form
 from fastapi.responses import FileResponse
+from json import loads, JSONDecodeError
 
 router = APIRouter()
 
@@ -16,8 +17,8 @@ def get_report(values: UploadFile = Depends(read_form)):
 
     # Конвертирование строки в словарь, т.к. это переданный параметр.
     try:
-        data = eval(data)
-    except (SyntaxError, NameError):
+        data = loads(data)
+    except (TypeError, JSONDecodeError):
         raise HTTPException(status_code=406, detail='Не верно передан словарь значений. Пожалуйста, посмотрите пример'
                                                     ' и повторите ещё раз.')
 
