@@ -32,10 +32,10 @@ def create_report(template, values):
 
     current_date = datetime.now()
 
-    if 'date' not in data.keys():
+    if not data.get('date'):
         data.update({'date': current_date.strftime('%Y.%m.%d')})
 
-    if 'time' not in data.keys():
+    if not data.get('time'):
         data.update({'time': current_date.strftime('%H:%M')})
 
     filled_template = template.format_map(SafeDict(**data))
