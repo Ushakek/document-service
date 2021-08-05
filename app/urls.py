@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, Depends, HTTPException, Response
-from app.servies import create_pdf_report, create_report
+from app.logic import create_pdf_report, create_report
 from app.dependencies import read_form
 from fastapi.responses import FileResponse
 
