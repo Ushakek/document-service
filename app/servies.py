@@ -1,6 +1,5 @@
 from weasyprint import HTML
 from datetime import datetime
-from fastapi import Response
 
 
 class SafeDict(dict):
@@ -8,13 +7,12 @@ class SafeDict(dict):
         return 'Информация не найдена'
 
 
-def create_report(template, values, media_type):
+def create_report(template, values):
     """ Метод для автозаполнения документов
 
     Args:
-        template: шаблон в любом формате, который в дальнейшем заполняется
+        template: шаблон в любом формате и байтовом виде, который в дальнейшем заполняется
         values: Значения, должны быть в виде словаря
-        media_type: тип документа
 
     Принимает в себя 2 значения  в битовом формате, дале производит декодирование этих значений. Далее заполняет
     отмеченные места в соответствии со значениями в словаре.
@@ -25,29 +23,26 @@ def create_report(template, values, media_type):
         return = 'Это новый метод, который способен заполнять пустые места'
 
     Returns:
-        Response(): файл исходной кодировки
+        filled_template: заполненный файл
     """
 
+    # Декодирование шаблона, т.к. передаётся в байтовом виде.
     template = template.decode(encoding='utf8')
     data = values
 
     current_date = datetime.now()
-    date_sys = current_date.strftime('%Y.%m.%d')
-    time_sys = current_date.strftime('%H:%M')
 
-    if 'date' not in data.keys() and 'time' not in data.keys():
-        data.update({'date': date_sys})
-        data.update({'time': time_sys})
-    elif 'date' not in data.keys():
-        data.update({'date': date_sys})
-    elif 'time' not in data.keys():
-        data.update({'time': time_sys})
+    if 'date' not in data.keys():
+        data.update({'date': current_date.strftime('%Y.%m.%d')})
+
+    if 'time' not in data.keys():
+        data.update({'time': current_date.strftime('%H:%M')})
 
     filled_template = template.format_map(SafeDict(**data))
-    return Response(content=filled_template, media_type=media_type)
+    return filled_template
 
 
-def create_pdf_report(template, values, media_type):
+def create_pdf_report(template, values):
     """ Метод конвертации HTML в PDF
 
     Использует метод create_report() для автозваполнения шаблона, передаёт этот шаблон в кодератор HTML5
@@ -56,13 +51,12 @@ def create_pdf_report(template, values, media_type):
     Args:
         template: шаблон в формате HTML, который в дальнейшем заполняется
         values: Значения, должны быть в виде словаря
-        media_type: тип документа, используется только для автозаполнения
 
     Returns:
-        Response(): Файл в формате pdf
+        data: Файл в формате pdf
     """
-    html_report = create_report(template=template, values=values, media_type=media_type)
-    html_print = HTML(string=html_report.body)
+    html_report = create_report(template=template, values=values)
+    html_print = HTML(string=html_report)
     data = html_print.write_pdf()
-    return Response(content=data, media_type='application/pdf')
+    return data
 
