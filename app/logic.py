@@ -4,30 +4,32 @@ from datetime import datetime
 
 class SafeDict(dict):
     def __missing__(self, key):
-        return 'Информация не найдена'
+        return key
 
 
-def create_report(template, values):
+def filling(template, values):
     """ Метод для автозаполнения документов
 
     Args:
-        template: шаблон в любом формате и байтовом виде, который в дальнейшем заполняется
+        template: шаблон в который будет происходить заполнение из словаря values
         values: Значения, должны быть в виде словаря
 
-    Принимает в себя 2 значения  в битовом формате, дале производит декодирование этих значений. Далее заполняет
-    отмеченные места в соответствии со значениями в словаре.
+    В метод принимается шаблон и значения, которые в дальнейшем заполняются.
+    Если ключ в словаре есть, а в тексте нет - ничего не произойдёт. Если в тесте есть ключ, а в словаре нет -
+    то ключ не заменится.
 
     Пример:
         template = 'Это новый {blank1}, который способен {blank2} пустые места'
+
         values = {'blank1': 'метод', 'blank2': 'заполнять'}
+
         return = 'Это новый метод, который способен заполнять пустые места'
 
     Returns:
-        filled_template: заполненный файл
+        filled_template: заполненный шаблон
     """
 
     # Декодирование шаблона, т.к. передаётся в байтовом виде.
-    template = template.decode(encoding='utf8')
     data = values
 
     current_date = datetime.now()
@@ -42,21 +44,19 @@ def create_report(template, values):
     return filled_template
 
 
-def create_pdf_report(template, values):
+def converter_to_pdf(source):
     """ Метод конвертации HTML в PDF
 
-    Использует метод create_report() для автозваполнения шаблона, передаёт этот шаблон в кодератор HTML5
-    для дальнейшей конвертации в PDF. Можно использовать только HTML шаблоны
+    Использует weasyprint библиотеку для конвертации в PDF. Для того, что бы документ был правильно сконвертирован,
+    исходный файл должен быть в формате HTML
 
     Args:
-        template: шаблон в формате HTML, который в дальнейшем заполняется
-        values: Значения, должны быть в виде словаря
+        source: шаблон в формате HTML, который в дальнейшем заполняется
 
     Returns:
         data: Файл в формате pdf
     """
-    html_report = create_report(template=template, values=values)
-    html_print = HTML(string=html_report)
-    data = html_print.write_pdf()
+    operation = HTML(string=source)
+    data = operation.write_pdf()
     return data
 
