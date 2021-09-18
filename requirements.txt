@@ -1,5 +1,4 @@
--i http://production:8081/repository/pypi-all/simple --trusted-host production
-fastapi==0.61.1
-uvicorn==0.12.2
-weasyprint==52.5
+fastapi
+uvicorn
+weasyprint
 python-multipart
