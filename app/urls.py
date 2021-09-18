@@ -1,19 +1,23 @@
-from fastapi import APIRouter, UploadFile, Depends, HTTPException, Response
-from app.logic import create_pdf_report, create_report
-from app.dependencies import read_form
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, UploadFile, HTTPException, Response, Query, File
+from app.logic import filling, converter_to_pdf
 from json import loads, JSONDecodeError
 
 router = APIRouter()
 
 
-@router.put('/create_report', response_class=FileResponse)
-def get_report(values: UploadFile = Depends(read_form)):
+@router.put('/filing_template')
+def filling_template(data: str = Query(..., description='Значения для подстановки в файл. '
+                                                        'Данные должны быть в формате словаря.',
+                                       example={'first key': 'fist data'}),
+                     template: UploadFile = File(...,
+                                                 description='Шаблон в который подставляются значения из `values`.'
+                                                             ' Должен содержать `{<ключ>}`, для успешной подстановки, '
+                                                             'где `<ключ>`, совпадает с ключами '
+                                                             'передаваемого словаря `values`.')):
 
-    data, template, convert_to = values
-    extension = 'html' if template.filename.endswith('.html') else template.filename.split('.')[-1]
     media_type = template.content_type
     template = template.file.read()
+    template = template.decode(encoding='utf8')
 
     # Конвертирование строки в словарь, т.к. это переданный параметр.
     try:
@@ -22,12 +26,14 @@ def get_report(values: UploadFile = Depends(read_form)):
         raise HTTPException(status_code=406, detail='Не верно передан словарь значений. Пожалуйста, посмотрите пример'
                                                     ' и повторите ещё раз.')
 
-    if convert_to == 'pdf' and extension != 'html':
-        message = 'Не удалось определить формат шаблона. Шаблон должен быть в формате html для конвертации в pdf'
-        raise HTTPException(status_code=406, detail=message)
-    elif convert_to == 'pdf' and extension == 'html':
-        report = create_pdf_report(template=template, values=data)
-        return Response(content=report, media_type='application/pdf')
-    elif convert_to == 'default':
-        report = create_report(template=template, values=data)
-        return Response(content=report, media_type=media_type)
+    op = filling(template=template, values=data)
+    return Response(content=op, media_type=media_type)
+
+
+@router.put('/converter')
+def converter(template: UploadFile = File(..., description='Шаблон, который будет сконвртирован в `PDF`.'
+                                                           'Для успешной конвертации нужно использовать `HTML` шаблон')):
+
+    template = template.file.read()
+    op = converter_to_pdf(template)
+    return Response(content=op, media_type='application/pdf')
