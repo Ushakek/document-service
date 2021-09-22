@@ -1,11 +1,18 @@
 # Установка Ubuntu и python
-FROM python:3.8-slim-buster
+FROM python:3.9-buster
 
 # Обновление Ubuntu & Обновление pip и setuptools
 RUN apt-get -y update \
-    && apt-get -y upgrade \
-    && python -m pip install --upgrade pip setuptools \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y \
+        fonts-font-awesome \
+        libffi-dev \
+        libgdk-pixbuf2.0-0 \
+        libpango1.0-0 \
+        python-dev \
+        python-lxml \
+        shared-mime-info \
+        libcairo2 \
+    && apt-get -y clean
 
 # Установка зависимостей
 COPY requirements.txt .
